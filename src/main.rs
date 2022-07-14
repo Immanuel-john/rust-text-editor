@@ -1,18 +1,23 @@
 use std::io::{self, Read, stdin, stdout};
 use termion::raw::IntoRawMode;
+use termion::event::Key;
+use termion::input::TermRead;
+
 fn main() {
     let _stdoout = stdout().into_raw_mode().unwrap();
-    for b in io::stdin().bytes() {
-        match b {
-            Ok(b) => {
-                let c = b as char;
-                if c.is_control() {
-                    println!("{:?}\r",b)
-                } else {
-                    println!("{:?} ({})\r",b,c)
-                }
-                if b == to_ctrl_byte('q') {
-                    break;
+    for key in io::stdin().keys() {
+        match key {
+            Ok(key) => {
+                match key {
+                   Key::Char(c) => {
+                        if c.is_control() {
+                            println!("{:?}\r", c as u8)
+                        } else {
+                            println!("{:?} ({})\r",c as u8,c)
+                        }
+                    }
+                    Key::Ctrl('q') => break,
+                    _ => println!("{:?}\r", key),
                 }
             }
             Err(err) => die(err),
